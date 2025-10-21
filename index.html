@@ -1,180 +1,207 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Planilha de Custos Laboratoriais</title>
-  <style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Planilha de Custos de Exames - Décio Camargo</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 30px;
+    background-color: #f8f9fa;
+    color: #333;
+  }
+  h1 {
+    color: #0164cc;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .container {
+    max-width: 1000px;
+    margin: 0 auto;
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+  }
+  th, td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: left;
+  }
+  th {
+    background-color: #0164cc;
+    color: white;
+  }
+  input[type="text"], input[type="number"] {
+    width: 95%;
+    padding: 6px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+  }
+  .add-btn, .calc-btn, .clear-btn, .print-btn {
+    background-color: #0164cc;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    margin: 8px 5px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  .add-btn:hover, .calc-btn:hover, .clear-btn:hover, .print-btn:hover {
+    background-color: #014b99;
+  }
+  .results {
+    margin-top: 20px;
+    background: #eef5ff;
+    padding: 15px;
+    border-radius: 8px;
+  }
+  .logo-print {
+    display: none;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  @media print {
     body {
-      font-family: Arial, sans-serif;
-      background: #f8f9fa;
-      color: #333;
-      margin: 0;
-      padding: 20px;
-    }
-    h1 {
-      text-align: center;
-      color: #0164cc;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
       background: white;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 0 5px rgba(0,0,0,0.1);
     }
-    th, td {
-      border: 1px solid #ddd;
-      padding: 10px;
-      text-align: center;
+    .no-print {
+      display: none;
     }
-    th {
-      background: #0164cc;
-      color: white;
+    .logo-print {
+      display: block;
     }
-    input[type="text"], input[type="number"] {
-      width: 90%;
-      padding: 5px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-    button {
-      background: #0164cc;
-      color: white;
-      border: none;
-      padding: 10px 15px;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-    button:hover {
-      background: #014a99;
-    }
-    .container {
-      max-width: 900px;
-      margin: auto;
-    }
-    .inputs {
-      margin-top: 20px;
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-    }
-    .summary {
-      margin-top: 30px;
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 0 5px rgba(0,0,0,0.1);
-    }
-    .summary div {
-      margin: 10px 0;
-      font-size: 1.1em;
-    }
-    .highlight {
-      color: #0164cc;
-      font-weight: bold;
-    }
-  </style>
+  }
+</style>
 </head>
 <body>
   <div class="container">
-    <h1>Planilha de Custos Laboratoriais</h1>
-    <table id="tabela">
+    <div class="logo-print">
+      <img src="https://www.deciocamargo.com.br/custom/logo.png?jetev=0048743775389380" alt="Décio Camargo" width="220">
+    </div>
+
+    <h1>Planilha de Custos de Exames</h1>
+
+    <div class="no-print">
+      <label><b>Nome do Exame:</b></label>
+      <input type="text" id="examName" placeholder="Ex: Glicose, Hemograma, etc." style="width: 100%; margin-bottom: 15px;">
+    </div>
+
+    <table id="productsTable">
       <thead>
         <tr>
           <th>Produto</th>
-          <th>Quantidade da caixa / testes</th>
-          <th>Valor pago (R$)</th>
-          <th>Custo por exame (R$)</th>
-          <th>Ações</th>
+          <th>Quantidade da Caixa/Testes</th>
+          <th>Valor Pago (R$)</th>
+          <th>Custo Unitário (R$)</th>
+          <th class="no-print">Remover</th>
         </tr>
       </thead>
-      <tbody id="tabela-corpo">
+      <tbody id="tableBody">
         <tr>
-          <td><input type="text" placeholder="Ex: Pipeta 10uL"></td>
-          <td><input type="number" placeholder="Ex: 100"></td>
-          <td><input type="number" placeholder="Ex: 50" step="0.01"></td>
-          <td class="custo-exame">0.00</td>
-          <td><button onclick="removerLinha(this)">🗑️</button></td>
+          <td><input type="text" placeholder="Nome do produto"></td>
+          <td><input type="number" placeholder="Qtd" min="1"></td>
+          <td><input type="number" placeholder="Valor" step="0.01" min="0"></td>
+          <td class="unit-cost">-</td>
+          <td class="no-print"><button onclick="removeRow(this)">🗑️</button></td>
         </tr>
       </tbody>
     </table>
 
-    <div class="inputs">
-      <button onclick="adicionarLinha()">➕ Adicionar Produto</button>
+    <div class="no-print">
+      <button class="add-btn" onclick="addRow()">+ Adicionar Produto</button>
+      <button class="clear-btn" onclick="clearAll()">🧹 Limpar Tudo</button>
     </div>
 
-    <div class="summary">
-      <div>
-        <label><strong>Valor do aluguel mensal do equipamento (R$):</strong></label><br>
-        <input type="number" id="aluguel" placeholder="Ex: 3000" step="0.01">
-      </div>
-      <div>
-        <label><strong>Quantidade de dias de uso no mês:</strong></label><br>
-        <input type="number" id="dias" placeholder="Ex: 30">
-      </div>
-      <div>
-        <label><strong>Quantidade de exames por dia:</strong></label><br>
-        <input type="number" id="exames-dia" placeholder="Ex: 50">
-      </div>
-      <div style="margin-top:15px;">
-        <button onclick="calcular()">🧮 Calcular Custos</button>
-      </div>
+    <div class="no-print" style="margin-top: 20px;">
+      <label><b>Valor do Aluguel do Equipamento (R$):</b></label>
+      <input type="number" id="rentalValue" step="0.01" placeholder="Ex: 3000">
+      <br><br>
+      <label><b>Testes Realizados por Dia:</b></label>
+      <input type="number" id="testsPerDay" placeholder="Ex: 50">
+      <br><br>
+      <button class="calc-btn" onclick="calculate()">Calcular Custo Total</button>
+      <button class="print-btn" onclick="window.print()">🖨️ Imprimir</button>
     </div>
 
-    <div class="summary">
-      <div><strong>Custo total dos produtos:</strong> R$ <span id="total-produtos" class="highlight">0.00</span></div>
-      <div><strong>Custo do aluguel por exame:</strong> R$ <span id="aluguel-exame" class="highlight">0.00</span></div>
-      <div><strong>Custo total por exame:</strong> R$ <span id="total-exame" class="highlight">0.00</span></div>
+    <div class="results" id="results">
+      <h3>Resultados</h3>
+      <p><b>Nome do Exame:</b> <span id="examNameResult">-</span></p>
+      <p><b>Custo Total dos Insumos:</b> R$ <span id="totalCost">0.00</span></p>
+      <p><b>Participação do Aluguel por Teste:</b> R$ <span id="rentalCostPerTest">0.00</span></p>
+      <p><b>Custo Final por Teste:</b> <span style="color:#0164cc; font-size:18px; font-weight:bold;">R$ <span id="finalCost">0.00</span></span></p>
     </div>
   </div>
 
-  <script>
-    function adicionarLinha() {
-      const tabela = document.getElementById('tabela-corpo');
-      const linha = document.createElement('tr');
-      linha.innerHTML = `
-        <td><input type="text" placeholder="Ex: Reagente XYZ"></td>
-        <td><input type="number" placeholder="Ex: 100"></td>
-        <td><input type="number" placeholder="Ex: 150" step="0.01"></td>
-        <td class="custo-exame">0.00</td>
-        <td><button onclick="removerLinha(this)">🗑️</button></td>
-      `;
-      tabela.appendChild(linha);
+<script>
+function addRow() {
+  const tableBody = document.getElementById("tableBody");
+  const row = document.createElement("tr");
+  row.innerHTML = `
+    <td><input type="text" placeholder="Nome do produto"></td>
+    <td><input type="number" placeholder="Qtd" min="1"></td>
+    <td><input type="number" placeholder="Valor" step="0.01" min="0"></td>
+    <td class="unit-cost">-</td>
+    <td class="no-print"><button onclick="removeRow(this)">🗑️</button></td>
+  `;
+  tableBody.appendChild(row);
+}
+
+function removeRow(button) {
+  button.closest("tr").remove();
+}
+
+function clearAll() {
+  if (confirm("Deseja realmente limpar todos os dados?")) {
+    document.getElementById("examName").value = "";
+    document.getElementById("rentalValue").value = "";
+    document.getElementById("testsPerDay").value = "";
+    document.getElementById("tableBody").innerHTML = `
+      <tr>
+        <td><input type="text" placeholder="Nome do produto"></td>
+        <td><input type="number" placeholder="Qtd" min="1"></td>
+        <td><input type="number" placeholder="Valor" step="0.01" min="0"></td>
+        <td class="unit-cost">-</td>
+        <td class="no-print"><button onclick="removeRow(this)">🗑️</button></td>
+      </tr>
+    `;
+    document.getElementById("results").querySelectorAll("span").forEach(s => s.textContent = "0.00");
+    document.getElementById("examNameResult").textContent = "-";
+  }
+}
+
+function calculate() {
+  const rows = document.querySelectorAll("#tableBody tr");
+  let totalCost = 0;
+  rows.forEach(row => {
+    const qty = parseFloat(row.cells[1].querySelector("input").value);
+    const value = parseFloat(row.cells[2].querySelector("input").value);
+    if (!isNaN(qty) && !isNaN(value) && qty > 0) {
+      const unit = value / qty;
+      row.querySelector(".unit-cost").textContent = unit.toFixed(2);
+      totalCost += unit;
+    } else {
+      row.querySelector(".unit-cost").textContent = "-";
     }
+  });
 
-    function removerLinha(botao) {
-      botao.parentElement.parentElement.remove();
-    }
+  const rental = parseFloat(document.getElementById("rentalValue").value) || 0;
+  const tests = parseFloat(document.getElementById("testsPerDay").value) || 1;
+  const rentalPerTest = rental / 30 / tests;
+  const finalCost = totalCost + rentalPerTest;
 
-    function calcular() {
-      const linhas = document.querySelectorAll('#tabela-corpo tr');
-      let totalProdutos = 0;
-
-      linhas.forEach(linha => {
-        const qtd = parseFloat(linha.children[1].querySelector('input').value) || 0;
-        const valor = parseFloat(linha.children[2].querySelector('input').value) || 0;
-
-        const custoPorExame = qtd > 0 ? valor / qtd : 0;
-        linha.querySelector('.custo-exame').textContent = custoPorExame.toFixed(2);
-
-        totalProdutos += custoPorExame;
-      });
-
-      const aluguel = parseFloat(document.getElementById('aluguel').value) || 0;
-      const dias = parseFloat(document.getElementById('dias').value) || 30;
-      const examesDia = parseFloat(document.getElementById('exames-dia').value) || 1;
-
-      const aluguelDia = aluguel / dias;
-      const aluguelPorExame = aluguelDia / examesDia;
-
-      document.getElementById('total-produtos').textContent = totalProdutos.toFixed(2);
-      document.getElementById('aluguel-exame').textContent = aluguelPorExame.toFixed(2);
-      document.getElementById('total-exame').textContent = (totalProdutos + aluguelPorExame).toFixed(2);
-    }
-  </script>
+  document.getElementById("examNameResult").textContent = document.getElementById("examName").value || "-";
+  document.getElementById("totalCost").textContent = totalCost.toFixed(2);
+  document.getElementById("rentalCostPerTest").textContent = rentalPerTest.toFixed(2);
+  document.getElementById("finalCost").textContent = finalCost.toFixed(2);
+}
+</script>
 </body>
 </html>

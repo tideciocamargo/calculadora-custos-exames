@@ -98,7 +98,7 @@
           <option value="Controle">Controle</option>
           <option value="Outro">Outro</option>
         </select>
-        <input type="number" id="quantidade" placeholder="Quantidade" min="1">
+        <input type="number" id="quantidade" placeholder="Quantidade da caixa / testes" min="1">
         <input type="number" id="valor" placeholder="Valor pago (R$)" step="0.01" min="0">
         <button onclick="adicionarProduto()">Adicionar</button>
       </div>
@@ -138,29 +138,9 @@
       </table>
     </div>
 
-    <!-- Equipamentos -->
-    <div class="section">
-      <h2>3️⃣ Equipamentos (Depreciação)</h2>
-      <div class="inputs">
-        <input type="text" id="equipamentoNome" placeholder="Nome do equipamento">
-        <input type="number" id="equipamentoValor" placeholder="Valor do equipamento (R$)" step="0.01" min="0">
-        <button onclick="adicionarEquipamento()">Adicionar</button>
-      </div>
-      <table id="tabelaEquipamentos">
-        <thead>
-          <tr>
-            <th>Equipamento</th>
-            <th>Valor (R$)</th>
-            <th>Remover</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-
     <!-- Cálculo final -->
     <div class="section">
-      <h2>4️⃣ Cálculo Final</h2>
+      <h2>3️⃣ Cálculo Final</h2>
       <div class="inputs">
         <input type="number" id="examesDia" placeholder="Exames realizados no dia" min="1">
         <input type="number" id="margem" placeholder="Margem de lucro (%)" step="1" min="0">
@@ -171,7 +151,6 @@
         <h3>📊 Resultados</h3>
         <p>Total de insumos: <span id="totalInsumos">R$ 0,00</span></p>
         <p>Custos fixos diários: <span id="fixosDiarios">R$ 0,00</span></p>
-        <p>Depreciação diária: <span id="depreciacaoDiaria">R$ 0,00</span></p>
         <p><strong>Custo total por exame:</strong> <span class="total" id="custoExame">R$ 0,00</span></p>
         <p><strong>Preço sugerido (com margem):</strong> <span class="total" id="precoSugerido">R$ 0,00</span></p>
 
@@ -187,7 +166,6 @@
   <script>
     let produtos = [];
     let custosFixos = [];
-    let equipamentos = [];
 
     function adicionarProduto() {
       const nome = document.getElementById('nome').value.trim();
@@ -245,31 +223,6 @@
 
     function removerFixo(i){ custosFixos.splice(i,1); atualizarTabelaFixos(); }
 
-    function adicionarEquipamento(){
-      const nome = document.getElementById('equipamentoNome').value.trim();
-      const valor = parseFloat(document.getElementById('equipamentoValor').value);
-      const anos = parseFloat(document.getElementById('equipamentoAnos').value);
-      if (!nome || !valor || !anos) return alert("Preencha todos os campos do equipamento!");
-      const depreciacaoDiaria = valor / (anos * 365);
-      equipamentos.push({ nome, valor, anos, depreciacaoDiaria });
-      atualizarTabelaEquip();
-      document.getElementById('equipamentoNome').value='';
-      document.getElementById('equipamentoValor').value='';
-      document.getElementById('equipamentoAnos').value='';
-    }
-
-    function atualizarTabelaEquip(){
-      const tbody = document.querySelector('#tabelaEquipamentos tbody');
-      tbody.innerHTML='';
-      equipamentos.forEach((e,i)=>{
-        const tr=document.createElement('tr');
-        tr.innerHTML=`<td>${e.nome}</td><td>R$ ${e.valor.toFixed(2)}</td><td>${e.anos}</td><td>R$ ${e.depreciacaoDiaria.toFixed(2)}</td><td><button onclick="removerEquip(${i})">🗑️</button></td>`;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function removerEquip(i){ equipamentos.splice(i,1); atualizarTabelaEquip(); }
-
     function calcularCusto(){
       if(produtos.length===0) return alert("Adicione ao menos um produto!");
       const examesDia=parseFloat(document.getElementById('examesDia').value);
@@ -279,24 +232,21 @@
       const totalInsumos=produtos.reduce((acc,p)=>acc+p.custoUnitario,0);
       const totalFixosMensal=custosFixos.reduce((acc,c)=>acc+c.valor,0);
       const fixosDiarios=totalFixosMensal/30;
-      const depreciacaoTotal=equipamentos.reduce((acc,e)=>acc+e.depreciacaoDiaria,0);
 
-      const custoPorExame=(totalInsumos+fixosDiarios+depreciacaoTotal)/examesDia;
+      const custoPorExame=(totalInsumos+fixosDiarios)/examesDia;
       const precoSugerido=custoPorExame*(1+(margem/100));
 
       document.getElementById('totalInsumos').innerText=`R$ ${totalInsumos.toFixed(2)}`;
       document.getElementById('fixosDiarios').innerText=`R$ ${fixosDiarios.toFixed(2)}`;
-      document.getElementById('depreciacaoDiaria').innerText=`R$ ${depreciacaoTotal.toFixed(2)}`;
       document.getElementById('custoExame').innerText=`R$ ${custoPorExame.toFixed(2)}`;
       document.getElementById('precoSugerido').innerText=`R$ ${precoSugerido.toFixed(2)}`;
 
       // gerar resumo percentual
-      const totalGeral=totalInsumos+fixosDiarios+depreciacaoTotal;
+      const totalGeral=totalInsumos+fixosDiarios;
       const resumo=document.getElementById('resumoCusto');
       resumo.innerHTML=`
         <tr><td>Insumos</td><td>R$ ${totalInsumos.toFixed(2)}</td><td>${((totalInsumos/totalGeral)*100).toFixed(1)}%</td></tr>
         <tr><td>Custos Fixos</td><td>R$ ${fixosDiarios.toFixed(2)}</td><td>${((fixosDiarios/totalGeral)*100).toFixed(1)}%</td></tr>
-        <tr><td>Depreciação</td><td>R$ ${depreciacaoTotal.toFixed(2)}</td><td>${((depreciacaoTotal/totalGeral)*100).toFixed(1)}%</td></tr>
       `;
       document.getElementById('resultados').style.display='block';
     }

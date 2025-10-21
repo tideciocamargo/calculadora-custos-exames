@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora de Custo por Exame | Décio Camargo</title>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background-color: #f8f9fa;
+      color: #333;
+      padding: 40px;
+      margin: 0;
+    }
+
+    h1 {
+      color: #0164cc;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #0164cc;
+      color: white;
+    }
+
+    input[type="text"], input[type="number"] {
+      padding: 6px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      width: 90%;
+    }
+
+    button {
+      background-color: #0164cc;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 16px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background-color: #014c9c;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background-color: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .inputs {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+
+    .resultados {
+      margin-top: 30px;
+      background-color: #e9f3ff;
+      padding: 20px;
+      border-radius: 10px;
+    }
+
+    .resultados h3 {
+      margin-bottom: 10px;
+      color: #0164cc;
+    }
+
+    .total {
+      font-weight: bold;
+      font-size: 1.2em;
+      color: #014c9c;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Planilha de Custo de Exames</h1>
+
+    <div class="inputs">
+      <input type="text" id="nome" placeholder="Nome do produto">
+      <input type="number" id="quantidade" placeholder="Quantidade" min="1">
+      <input type="number" id="valor" placeholder="Valor pago (R$)" step="0.01" min="0">
+      <button onclick="adicionarProduto()">Adicionar</button>
+    </div>
+
+    <table id="tabela">
+      <thead>
+        <tr>
+          <th>Produto</th>
+          <th>Quantidade</th>
+          <th>Valor Pago (R$)</th>
+          <th>Custo Unitário (R$)</th>
+          <th>Remover</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <div class="inputs" style="margin-top: 25px;">
+      <input type="number" id="aluguel" placeholder="Valor do aluguel (R$)" step="0.01" min="0">
+      <input type="number" id="examesDia" placeholder="Exames realizados no dia" min="1">
+      <button onclick="calcularCusto()">Calcular Custos</button>
+    </div>
+
+    <div class="resultados" id="resultados" style="display:none;">
+      <h3>Resultados:</h3>
+      <p>Total de insumos: <span id="totalInsumos">R$ 0,00</span></p>
+      <p>Aluguel diário: <span id="aluguelDiario">R$ 0,00</span></p>
+      <p>Custo por exame (insumos + aluguel): <span class="total" id="custoExame">R$ 0,00</span></p>
+    </div>
+  </div>
+
+  <script>
+    let produtos = [];
+
+    function adicionarProduto() {
+      const nome = document.getElementById('nome').value.trim();
+      const quantidade = parseFloat(document.getElementById('quantidade').value);
+      const valor = parseFloat(document.getElementById('valor').value);
+
+      if (!nome || !quantidade || !valor) {
+        alert("Preencha todos os campos do produto!");
+        return;
+      }
+
+      const custoUnitario = valor / quantidade;
+
+      produtos.push({ nome, quantidade, valor, custoUnitario });
+      atualizarTabela();
+
+      document.getElementById('nome').value = '';
+      document.getElementById('quantidade').value = '';
+      document.getElementById('valor').value = '';
+    }
+
+    function atualizarTabela() {
+      const tbody = document.querySelector('#tabela tbody');
+      tbody.innerHTML = '';
+
+      produtos.forEach((p, index) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${p.nome}</td>
+          <td>${p.quantidade}</td>
+          <td>R$ ${p.valor.toFixed(2)}</td>
+          <td>R$ ${p.custoUnitario.toFixed(2)}</td>
+          <td><button onclick="removerProduto(${index})">🗑️</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function removerProduto(index) {
+      produtos.splice(index, 1);
+      atualizarTabela();
+    }
+
+    function calcularCusto() {
+      if (produtos.length === 0) {
+        alert("Adicione ao menos um produto!");
+        return;
+      }
+
+      const aluguel = parseFloat(document.getElementById('aluguel').value);
+      const examesDia = parseInt(document.getElementById('examesDia').value);
+
+      if (!aluguel || !examesDia) {
+        alert("Informe o valor do aluguel e a quantidade de exames!");
+        return;
+      }
+
+      const totalInsumos = produtos.reduce((acc, p) => acc + p.custoUnitario, 0);
+      const aluguelDiario = aluguel / 30;
+      const custoAluguelPorExame = aluguelDiario / examesDia;
+      const custoTotal = totalInsumos + custoAluguelPorExame;
+
+      document.getElementById('totalInsumos').innerText = `R$ ${totalInsumos.toFixed(2)}`;
+      document.getElementById('aluguelDiario').innerText = `R$ ${aluguelDiario.toFixed(2)}`;
+      document.getElementById('custoExame').innerText = `R$ ${custoTotal.toFixed(2)}`;
+      document.getElementById('resultados').style.display = 'block';
+    }
+  </script>
+</body>
+</html>

@@ -3,252 +3,177 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Planilha de Custos Laboratoriais | Décio Camargo</title>
+  <title>Planilha de Custos Laboratoriais</title>
   <style>
     body {
-      font-family: "Segoe UI", sans-serif;
-      background-color: #f8f9fa;
+      font-family: Arial, sans-serif;
+      background: #f8f9fa;
       color: #333;
-      padding: 40px;
       margin: 0;
+      padding: 20px;
     }
-    h1, h2 {
-      color: #0164cc;
+    h1 {
       text-align: center;
+      color: #0164cc;
     }
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 15px;
+      margin-top: 20px;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
     }
     th, td {
       border: 1px solid #ddd;
-      padding: 8px;
+      padding: 10px;
       text-align: center;
     }
     th {
-      background-color: #0164cc;
+      background: #0164cc;
       color: white;
     }
-    tr:nth-child(even) { background-color: #f2f8ff; }
-    input, select {
-      padding: 6px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
+    input[type="text"], input[type="number"] {
       width: 90%;
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
     }
     button {
-      background-color: #0164cc;
+      background: #0164cc;
       color: white;
       border: none;
-      border-radius: 6px;
-      padding: 8px 16px;
+      padding: 10px 15px;
+      border-radius: 5px;
       cursor: pointer;
       transition: 0.3s;
     }
-    button:hover { background-color: #014c9c; }
+    button:hover {
+      background: #014a99;
+    }
     .container {
-      max-width: 1000px;
+      max-width: 900px;
       margin: auto;
-      background-color: white;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
     .inputs {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 15px;
-    }
-    .section {
-      margin-top: 30px;
-    }
-    .resultados {
-      background-color: #e9f3ff;
-      padding: 20px;
-      border-radius: 10px;
       margin-top: 20px;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
     }
-    .resultados h3 {
-      margin-bottom: 10px;
+    .summary {
+      margin-top: 30px;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+    .summary div {
+      margin: 10px 0;
+      font-size: 1.1em;
+    }
+    .highlight {
       color: #0164cc;
-    }
-    .total {
       font-weight: bold;
-      font-size: 1.2em;
-      color: #014c9c;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Planilha de Custos Laboratoriais</h1>
+    <table id="tabela">
+      <thead>
+        <tr>
+          <th>Produto</th>
+          <th>Quantidade da caixa / testes</th>
+          <th>Valor pago (R$)</th>
+          <th>Custo por exame (R$)</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="tabela-corpo">
+        <tr>
+          <td><input type="text" placeholder="Ex: Pipeta 10uL"></td>
+          <td><input type="number" placeholder="Ex: 100"></td>
+          <td><input type="number" placeholder="Ex: 50" step="0.01"></td>
+          <td class="custo-exame">0.00</td>
+          <td><button onclick="removerLinha(this)">🗑️</button></td>
+        </tr>
+      </tbody>
+    </table>
 
-    <!-- Produtos -->
-    <div class="section">
-      <h2>1️⃣ Insumos / Materiais</h2>
-      <div class="inputs">
-        <input type="text" id="nome" placeholder="Nome do produto">
-        <select id="categoria">
-          <option value="Reagente">Reagente</option>
-          <option value="Descartável">Descartável</option>
-          <option value="EPI">EPI</option>
-          <option value="Controle">Controle</option>
-          <option value="Outro">Outro</option>
-        </select>
-        <input type="number" id="quantidade" placeholder="Quantidade da caixa / testes" min="1">
-        <input type="number" id="valor" placeholder="Valor pago (R$)" step="0.01" min="0">
-        <button onclick="adicionarProduto()">Adicionar</button>
-      </div>
-
-      <table id="tabela">
-        <thead>
-          <tr>
-            <th>Produto</th>
-            <th>Categoria</th>
-            <th>Qtd</th>
-            <th>Valor Pago (R$)</th>
-            <th>Custo Unitário (R$)</th>
-            <th>Remover</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+    <div class="inputs">
+      <button onclick="adicionarLinha()">➕ Adicionar Produto</button>
     </div>
 
-    <!-- Custos fixos -->
-    <div class="section">
-      <h2>2️⃣ Custos Fixos</h2>
-      <div class="inputs">
-        <input type="text" id="nomeFixo" placeholder="Ex: Energia, Internet, Pessoal">
-        <input type="number" id="valorFixo" placeholder="Valor mensal (R$)" step="0.01" min="0">
-        <button onclick="adicionarCustoFixo()">Adicionar</button>
+    <div class="summary">
+      <div>
+        <label><strong>Valor do aluguel mensal do equipamento (R$):</strong></label><br>
+        <input type="number" id="aluguel" placeholder="Ex: 3000" step="0.01">
       </div>
-      <table id="tabelaFixos">
-        <thead>
-          <tr>
-            <th>Descrição</th>
-            <th>Valor Mensal (R$)</th>
-            <th>Remover</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+      <div>
+        <label><strong>Quantidade de dias de uso no mês:</strong></label><br>
+        <input type="number" id="dias" placeholder="Ex: 30">
+      </div>
+      <div>
+        <label><strong>Quantidade de exames por dia:</strong></label><br>
+        <input type="number" id="exames-dia" placeholder="Ex: 50">
+      </div>
+      <div style="margin-top:15px;">
+        <button onclick="calcular()">🧮 Calcular Custos</button>
+      </div>
     </div>
 
-    <!-- Cálculo final -->
-    <div class="section">
-      <h2>3️⃣ Cálculo Final</h2>
-      <div class="inputs">
-        <input type="number" id="examesDia" placeholder="Exames realizados no dia" min="1">
-        <input type="number" id="margem" placeholder="Margem de lucro (%)" step="1" min="0">
-        <button onclick="calcularCusto()">Calcular Custos</button>
-      </div>
-
-      <div class="resultados" id="resultados" style="display:none;">
-        <h3>📊 Resultados</h3>
-        <p>Total de insumos: <span id="totalInsumos">R$ 0,00</span></p>
-        <p>Custos fixos diários: <span id="fixosDiarios">R$ 0,00</span></p>
-        <p><strong>Custo total por exame:</strong> <span class="total" id="custoExame">R$ 0,00</span></p>
-        <p><strong>Preço sugerido (com margem):</strong> <span class="total" id="precoSugerido">R$ 0,00</span></p>
-
-        <h3>🧮 Percentual de cada tipo de custo:</h3>
-        <table>
-          <thead><tr><th>Tipo</th><th>Valor (R$)</th><th>%</th></tr></thead>
-          <tbody id="resumoCusto"></tbody>
-        </table>
-      </div>
+    <div class="summary">
+      <div><strong>Custo total dos produtos:</strong> R$ <span id="total-produtos" class="highlight">0.00</span></div>
+      <div><strong>Custo do aluguel por exame:</strong> R$ <span id="aluguel-exame" class="highlight">0.00</span></div>
+      <div><strong>Custo total por exame:</strong> R$ <span id="total-exame" class="highlight">0.00</span></div>
     </div>
   </div>
 
   <script>
-    let produtos = [];
-    let custosFixos = [];
-
-    function adicionarProduto() {
-      const nome = document.getElementById('nome').value.trim();
-      const categoria = document.getElementById('categoria').value;
-      const quantidade = parseFloat(document.getElementById('quantidade').value);
-      const valor = parseFloat(document.getElementById('valor').value);
-      if (!nome || !quantidade || !valor) return alert("Preencha todos os campos do produto!");
-
-      const custoUnitario = valor / quantidade;
-      produtos.push({ nome, categoria, quantidade, valor, custoUnitario });
-      atualizarTabela();
-      document.getElementById('nome').value = '';
-      document.getElementById('quantidade').value = '';
-      document.getElementById('valor').value = '';
-    }
-
-    function atualizarTabela() {
-      const tbody = document.querySelector('#tabela tbody');
-      tbody.innerHTML = '';
-      produtos.forEach((p, index) => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${p.nome}</td>
-          <td>${p.categoria}</td>
-          <td>${p.quantidade}</td>
-          <td>R$ ${p.valor.toFixed(2)}</td>
-          <td>R$ ${p.custoUnitario.toFixed(2)}</td>
-          <td><button onclick="removerProduto(${index})">🗑️</button></td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function removerProduto(i) { produtos.splice(i,1); atualizarTabela(); }
-
-    function adicionarCustoFixo() {
-      const nome = document.getElementById('nomeFixo').value.trim();
-      const valor = parseFloat(document.getElementById('valorFixo').value);
-      if (!nome || !valor) return alert("Preencha o nome e o valor do custo fixo!");
-      custosFixos.push({ nome, valor });
-      atualizarTabelaFixos();
-      document.getElementById('nomeFixo').value = '';
-      document.getElementById('valorFixo').value = '';
-    }
-
-    function atualizarTabelaFixos() {
-      const tbody = document.querySelector('#tabelaFixos tbody');
-      tbody.innerHTML = '';
-      custosFixos.forEach((c, index) => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${c.nome}</td><td>R$ ${c.valor.toFixed(2)}</td><td><button onclick="removerFixo(${index})">🗑️</button></td>`;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function removerFixo(i){ custosFixos.splice(i,1); atualizarTabelaFixos(); }
-
-    function calcularCusto(){
-      if(produtos.length===0) return alert("Adicione ao menos um produto!");
-      const examesDia=parseFloat(document.getElementById('examesDia').value);
-      const margem=parseFloat(document.getElementById('margem').value||0);
-      if(!examesDia) return alert("Informe o número de exames realizados!");
-
-      const totalInsumos=produtos.reduce((acc,p)=>acc+p.custoUnitario,0);
-      const totalFixosMensal=custosFixos.reduce((acc,c)=>acc+c.valor,0);
-      const fixosDiarios=totalFixosMensal/30;
-
-      const custoPorExame=(totalInsumos+fixosDiarios)/examesDia;
-      const precoSugerido=custoPorExame*(1+(margem/100));
-
-      document.getElementById('totalInsumos').innerText=`R$ ${totalInsumos.toFixed(2)}`;
-      document.getElementById('fixosDiarios').innerText=`R$ ${fixosDiarios.toFixed(2)}`;
-      document.getElementById('custoExame').innerText=`R$ ${custoPorExame.toFixed(2)}`;
-      document.getElementById('precoSugerido').innerText=`R$ ${precoSugerido.toFixed(2)}`;
-
-      // gerar resumo percentual
-      const totalGeral=totalInsumos+fixosDiarios;
-      const resumo=document.getElementById('resumoCusto');
-      resumo.innerHTML=`
-        <tr><td>Insumos</td><td>R$ ${totalInsumos.toFixed(2)}</td><td>${((totalInsumos/totalGeral)*100).toFixed(1)}%</td></tr>
-        <tr><td>Custos Fixos</td><td>R$ ${fixosDiarios.toFixed(2)}</td><td>${((fixosDiarios/totalGeral)*100).toFixed(1)}%</td></tr>
+    function adicionarLinha() {
+      const tabela = document.getElementById('tabela-corpo');
+      const linha = document.createElement('tr');
+      linha.innerHTML = `
+        <td><input type="text" placeholder="Ex: Reagente XYZ"></td>
+        <td><input type="number" placeholder="Ex: 100"></td>
+        <td><input type="number" placeholder="Ex: 150" step="0.01"></td>
+        <td class="custo-exame">0.00</td>
+        <td><button onclick="removerLinha(this)">🗑️</button></td>
       `;
-      document.getElementById('resultados').style.display='block';
+      tabela.appendChild(linha);
+    }
+
+    function removerLinha(botao) {
+      botao.parentElement.parentElement.remove();
+    }
+
+    function calcular() {
+      const linhas = document.querySelectorAll('#tabela-corpo tr');
+      let totalProdutos = 0;
+
+      linhas.forEach(linha => {
+        const qtd = parseFloat(linha.children[1].querySelector('input').value) || 0;
+        const valor = parseFloat(linha.children[2].querySelector('input').value) || 0;
+
+        const custoPorExame = qtd > 0 ? valor / qtd : 0;
+        linha.querySelector('.custo-exame').textContent = custoPorExame.toFixed(2);
+
+        totalProdutos += custoPorExame;
+      });
+
+      const aluguel = parseFloat(document.getElementById('aluguel').value) || 0;
+      const dias = parseFloat(document.getElementById('dias').value) || 30;
+      const examesDia = parseFloat(document.getElementById('exames-dia').value) || 1;
+
+      const aluguelDia = aluguel / dias;
+      const aluguelPorExame = aluguelDia / examesDia;
+
+      document.getElementById('total-produtos').textContent = totalProdutos.toFixed(2);
+      document.getElementById('aluguel-exame').textContent = aluguelPorExame.toFixed(2);
+      document.getElementById('total-exame').textContent = (totalProdutos + aluguelPorExame).toFixed(2);
     }
   </script>
 </body>
